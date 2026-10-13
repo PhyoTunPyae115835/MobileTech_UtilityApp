@@ -111,3 +111,5 @@ fun SettingsScreen() {
         Text("This is where you can add toggles or preferences.")
     }
 }
+
+
