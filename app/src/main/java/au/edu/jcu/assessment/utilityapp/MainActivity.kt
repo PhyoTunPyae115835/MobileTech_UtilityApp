@@ -8,36 +8,41 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
         setContent {
             MobileTech_UtilityAppTheme {
                 UtilityApp()
@@ -45,6 +50,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -54,29 +60,55 @@ fun UtilityAppPreview() {
     }
 }
 
+
 @Composable
 fun UtilityApp() {
-    var selectedTab by remember { mutableStateOf("Utility") }
+    var selectedTab by remember {
+        mutableStateOf("Utility")
+    }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
+
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Utility") },
-                    label = { Text("Utility") },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Utility"
+                        )
+                    },
+                    label = {
+                        Text("Utility")
+                    },
                     selected = selectedTab == "Utility",
-                    onClick = { selectedTab = "Utility" }
+                    onClick = {
+                        selectedTab = "Utility"
+                    }
                 )
+
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    },
+                    label = {
+                        Text("Settings")
+                    },
                     selected = selectedTab == "Settings",
-                    onClick = { selectedTab = "Settings" }
+                    onClick = {
+                        selectedTab = "Settings"
+                    }
                 )
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+
+        Box(
+            modifier = Modifier.padding(innerPadding)
+        ) {
             when (selectedTab) {
                 "Utility" -> UtilityScreen()
                 "Settings" -> SettingsScreen()
@@ -85,20 +117,12 @@ fun UtilityApp() {
     }
 }
 
+
 @Composable
-fun UtilityScreen() {
-    var caloriesPer100g by remember { mutableStateOf("") }
-    var weightInput by remember { mutableStateOf("") }
-
-    val calories = caloriesPer100g.toDoubleOrNull()
-    val weight = weightInput.toDoubleOrNull()
-
-    val estimatedCalories =
-        if (calories != null && weight != null) {
-            calories * weight / 100
-        } else {
-            0.0
-        }
+fun UtilityScreen(
+    calorieViewModel: CalorieViewModel = viewModel()
+) {
+    val uiState by calorieViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -106,32 +130,39 @@ fun UtilityScreen() {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+
         Text(
             text = "Calorie Calculator",
             style = MaterialTheme.typography.headlineMedium
         )
 
         OutlinedTextField(
-            value = caloriesPer100g,
+            value = uiState.caloriesPer100g,
             onValueChange = { newValue ->
+
                 if (newValue.all { it.isDigit() || it == '.' }) {
-                    caloriesPer100g = newValue
+                    calorieViewModel.updateCaloriesPer100g(newValue)
                 }
             },
-            label = { Text("Calories per 100g") },
+            label = {
+                Text("Calories per 100g")
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             )
         )
 
         OutlinedTextField(
-            value = weightInput,
+            value = uiState.weightInput,
             onValueChange = { newValue ->
+
                 if (newValue.all { it.isDigit() || it == '.' }) {
-                    weightInput = newValue
+                    calorieViewModel.updateWeight(newValue)
                 }
             },
-            label = { Text("Food weight (g)") },
+            label = {
+                Text("Food weight (g)")
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             )
@@ -143,16 +174,20 @@ fun UtilityScreen() {
                 defaultElevation = 4.dp
             )
         ) {
+
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
+
                 Text(
                     text = "Estimated calories",
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
-                    text = "%.0f kcal".format(estimatedCalories),
+                    text = "%.0f kcal".format(
+                        uiState.estimatedCalories
+                    ),
                     style = MaterialTheme.typography.headlineLarge
                 )
             }
@@ -163,14 +198,21 @@ fun UtilityScreen() {
 
 @Composable
 fun SettingsScreen() {
+
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp), Arrangement.spacedBy(16.dp)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Settings Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("This is where you can add toggles or preferences.")
+
+        Text(
+            text = "Settings Screen",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text(
+            text = "This is where you can add toggles or preferences."
+        )
     }
 }
-
-
