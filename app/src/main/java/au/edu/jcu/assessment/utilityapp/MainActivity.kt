@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,14 +112,28 @@ fun UtilityScreen() {
 
         OutlinedTextField(
             value = caloriesPer100g,
-            onValueChange = { caloriesPer100g = it },
-            label = { Text("Calories per 100g") }
+            onValueChange = { newValue ->
+                if (newValue.all { it.isDigit() || it == '.' }) {
+                    caloriesPer100g = newValue
+                }
+            },
+            label = { Text("Calories per 100g") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            )
         )
 
         OutlinedTextField(
             value = weightInput,
-            onValueChange = { weightInput = it },
-            label = { Text("Food weight (g)") }
+            onValueChange = { newValue ->
+                if (newValue.all { it.isDigit() || it == '.' }) {
+                    weightInput = newValue
+                }
+            },
+            label = { Text("Food weight (g)") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            )
         )
 
         Text(
