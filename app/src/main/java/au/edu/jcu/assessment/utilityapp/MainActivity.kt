@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
+import androidx.compose.material3.OutlinedTextField
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +84,18 @@ fun UtilityApp() {
 
 @Composable
 fun UtilityScreen() {
-    var counter by remember { mutableIntStateOf(0) }
+    var caloriesPer100g by remember { mutableStateOf("") }
+    var weightInput by remember { mutableStateOf("") }
+
+    val calories = caloriesPer100g.toDoubleOrNull()
+    val weight = weightInput.toDoubleOrNull()
+
+    val estimatedCalories =
+        if (calories != null && weight != null) {
+            calories * weight / 100
+        } else {
+            0.0
+        }
 
     Column(
         modifier = Modifier
@@ -91,12 +103,27 @@ fun UtilityScreen() {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Utility Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("Counter: $counter", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = "Calorie Calculator",
+            style = MaterialTheme.typography.headlineMedium
+        )
 
-        Button(onClick = { counter++ }) {
-            Text("Increment")
-        }
+        OutlinedTextField(
+            value = caloriesPer100g,
+            onValueChange = { caloriesPer100g = it },
+            label = { Text("Calories per 100g") }
+        )
+
+        OutlinedTextField(
+            value = weightInput,
+            onValueChange = { weightInput = it },
+            label = { Text("Food weight (g)") }
+        )
+
+        Text(
+            text = "Estimated calories: %.0f kcal".format(estimatedCalories),
+            style = MaterialTheme.typography.headlineSmall
+        )
     }
 }
 
