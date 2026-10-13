@@ -30,6 +30,9 @@ import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,10 +137,26 @@ fun UtilityScreen() {
             )
         )
 
-        Text(
-            text = "Estimated calories: %.0f kcal".format(estimatedCalories),
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 4.dp
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text(
+                    text = "Estimated calories",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "%.0f kcal".format(estimatedCalories),
+                    style = MaterialTheme.typography.headlineLarge
+                )
+            }
+        }
     }
 }
 
