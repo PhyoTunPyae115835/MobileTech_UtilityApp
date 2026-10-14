@@ -35,7 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
-
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Switch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +68,8 @@ fun UtilityApp() {
     var selectedTab by remember {
         mutableStateOf("Utility")
     }
+
+    val calorieViewModel: CalorieViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -110,8 +114,8 @@ fun UtilityApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             when (selectedTab) {
-                "Utility" -> UtilityScreen()
-                "Settings" -> SettingsScreen()
+                "Utility" -> UtilityScreen(calorieViewModel)
+                "Settings" -> SettingsScreen(calorieViewModel)
             }
         }
     }
@@ -120,9 +124,16 @@ fun UtilityApp() {
 
 @Composable
 fun UtilityScreen(
-    calorieViewModel: CalorieViewModel = viewModel()
+    calorieViewModel: CalorieViewModel
 ) {
     val uiState by calorieViewModel.uiState.collectAsState()
+
+    val calorieText =
+        if (uiState.showDecimals) {
+            "%.1f kcal".format(uiState.estimatedCalories)
+        } else {
+            "%.0f kcal".format(uiState.estimatedCalories)
+        }
 
     Column(
         modifier = Modifier
@@ -139,7 +150,6 @@ fun UtilityScreen(
         OutlinedTextField(
             value = uiState.caloriesPer100g,
             onValueChange = { newValue ->
-
                 if (newValue.all { it.isDigit() || it == '.' }) {
                     calorieViewModel.updateCaloriesPer100g(newValue)
                 }
@@ -155,7 +165,6 @@ fun UtilityScreen(
         OutlinedTextField(
             value = uiState.weightInput,
             onValueChange = { newValue ->
-
                 if (newValue.all { it.isDigit() || it == '.' }) {
                     calorieViewModel.updateWeight(newValue)
                 }
@@ -174,7 +183,6 @@ fun UtilityScreen(
                 defaultElevation = 4.dp
             )
         ) {
-
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
@@ -185,9 +193,7 @@ fun UtilityScreen(
                 )
 
                 Text(
-                    text = "%.0f kcal".format(
-                        uiState.estimatedCalories
-                    ),
+                    text = calorieText,
                     style = MaterialTheme.typography.headlineLarge
                 )
             }
@@ -197,7 +203,10 @@ fun UtilityScreen(
 
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    calorieViewModel: CalorieViewModel
+) {
+    val uiState by calorieViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -207,12 +216,25 @@ fun SettingsScreen() {
     ) {
 
         Text(
-            text = "Settings Screen",
+            text = "Settings",
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Text(
-            text = "This is where you can add toggles or preferences."
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Text(
+                text = "Show decimal calories"
+            )
+
+            Switch(
+                checked = uiState.showDecimals,
+                onCheckedChange = { checked ->
+                    calorieViewModel.updateShowDecimals(checked)
+                }
+            )
+        }
     }
 }

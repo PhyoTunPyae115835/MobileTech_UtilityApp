@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 data class CalorieUiState(
     val caloriesPer100g: String = "",
     val weightInput: String = "",
-    val estimatedCalories: Double = 0.0
+    val estimatedCalories: Double = 0.0,
+    val showDecimals: Boolean = false
 )
 
 class CalorieViewModel : ViewModel() {
@@ -28,6 +29,12 @@ class CalorieViewModel : ViewModel() {
             weightInput = value
         )
         calculateCalories()
+    }
+
+    fun updateShowDecimals(value: Boolean) {
+        _uiState.value = _uiState.value.copy(
+            showDecimals = value
+        )
     }
 
     private fun calculateCalories() {
