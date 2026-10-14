@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,6 +24,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,11 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Switch
+
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -65,6 +67,7 @@ fun UtilityAppPreview() {
 
 @Composable
 fun UtilityApp() {
+
     var selectedTab by remember {
         mutableStateOf("Utility")
     }
@@ -73,6 +76,7 @@ fun UtilityApp() {
 
     Scaffold(
         bottomBar = {
+
             NavigationBar {
 
                 NavigationBarItem(
@@ -113,9 +117,16 @@ fun UtilityApp() {
         Box(
             modifier = Modifier.padding(innerPadding)
         ) {
+
             when (selectedTab) {
-                "Utility" -> UtilityScreen(calorieViewModel)
-                "Settings" -> SettingsScreen(calorieViewModel)
+
+                "Utility" -> UtilityScreen(
+                    calorieViewModel = calorieViewModel
+                )
+
+                "Settings" -> SettingsScreen(
+                    calorieViewModel = calorieViewModel
+                )
             }
         }
     }
@@ -126,6 +137,7 @@ fun UtilityApp() {
 fun UtilityScreen(
     calorieViewModel: CalorieViewModel
 ) {
+
     val uiState by calorieViewModel.uiState.collectAsState()
 
     val calorieText =
@@ -147,11 +159,78 @@ fun UtilityScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
+
+        // Food search field
+
+        OutlinedTextField(
+            value = uiState.searchQuery,
+            onValueChange = { newValue ->
+                calorieViewModel.updateSearchQuery(newValue)
+            },
+            label = {
+                Text("Search food")
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+
+        // Search button
+
+        Button(
+            onClick = {
+                calorieViewModel.searchFoods()
+            }
+        ) {
+            Text("Search")
+        }
+
+
+        // Loading message
+
+        if (uiState.isLoading) {
+            Text(
+                text = "Loading..."
+            )
+        }
+
+
+        // Error message
+
+        uiState.errorMessage?.let { message ->
+
+            Text(
+                text = message
+            )
+        }
+
+
+        // Display first 5 API results
+
+        uiState.searchResults
+            .take(5)
+            .forEach { food ->
+
+                Text(
+                    text = food.description
+                )
+            }
+
+
+        // Calories per 100g
+
         OutlinedTextField(
             value = uiState.caloriesPer100g,
             onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() || it == '.' }) {
-                    calorieViewModel.updateCaloriesPer100g(newValue)
+
+                if (
+                    newValue.all {
+                        it.isDigit() || it == '.'
+                    }
+                ) {
+
+                    calorieViewModel.updateCaloriesPer100g(
+                        newValue
+                    )
                 }
             },
             label = {
@@ -159,14 +238,26 @@ fun UtilityScreen(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
-            )
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
+
+
+        // Food weight
 
         OutlinedTextField(
             value = uiState.weightInput,
             onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() || it == '.' }) {
-                    calorieViewModel.updateWeight(newValue)
+
+                if (
+                    newValue.all {
+                        it.isDigit() || it == '.'
+                    }
+                ) {
+
+                    calorieViewModel.updateWeight(
+                        newValue
+                    )
                 }
             },
             label = {
@@ -174,8 +265,12 @@ fun UtilityScreen(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
-            )
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
+
+
+        // Result card
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -183,6 +278,7 @@ fun UtilityScreen(
                 defaultElevation = 4.dp
             )
         ) {
+
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
@@ -206,6 +302,7 @@ fun UtilityScreen(
 fun SettingsScreen(
     calorieViewModel: CalorieViewModel
 ) {
+
     val uiState by calorieViewModel.uiState.collectAsState()
 
     Column(
@@ -232,7 +329,10 @@ fun SettingsScreen(
             Switch(
                 checked = uiState.showDecimals,
                 onCheckedChange = { checked ->
-                    calorieViewModel.updateShowDecimals(checked)
+
+                    calorieViewModel.updateShowDecimals(
+                        checked
+                    )
                 }
             )
         }
