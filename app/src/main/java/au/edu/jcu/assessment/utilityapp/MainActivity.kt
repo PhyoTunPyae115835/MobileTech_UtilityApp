@@ -210,9 +210,16 @@ fun UtilityScreen(
             .take(5)
             .forEach { food ->
 
-                Text(
-                    text = food.description
-                )
+                Button(
+                    onClick = {
+                        calorieViewModel.selectFood(food)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = food.description
+                    )
+                }
             }
 
 

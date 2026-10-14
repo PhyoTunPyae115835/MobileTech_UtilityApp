@@ -101,4 +101,21 @@ class CalorieViewModel(
             }
         }
     }
+
+    fun selectFood(food: FoodItem) {
+        val energy = food.foodNutrients.firstOrNull { nutrient ->
+            nutrient.nutrientName?.contains("Energy", ignoreCase = true) == true &&
+                    nutrient.unitName?.equals("KCAL", ignoreCase = true) == true
+        }
+
+        val calories = energy?.value ?: 0.0
+
+        _uiState.value = _uiState.value.copy(
+            caloriesPer100g = calories.toString(),
+            searchQuery = food.description,
+            searchResults = emptyList()
+        )
+
+        calculateCalories()
+    }
 }
