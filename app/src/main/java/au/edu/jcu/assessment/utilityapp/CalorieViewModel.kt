@@ -12,7 +12,9 @@ data class CalorieUiState(
     val showDecimals: Boolean = false
 )
 
-class CalorieViewModel : ViewModel() {
+class CalorieViewModel(
+    private val repository: CalorieRepository = CalorieRepository()
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalorieUiState())
     val uiState: StateFlow<CalorieUiState> = _uiState.asStateFlow()
@@ -43,7 +45,10 @@ class CalorieViewModel : ViewModel() {
 
         val result =
             if (calories != null && weight != null) {
-                calories * weight / 100
+                repository.calculateCalories(
+                    caloriesPer100g = calories,
+                    weight = weight
+                )
             } else {
                 0.0
             }
