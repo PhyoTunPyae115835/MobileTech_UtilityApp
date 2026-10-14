@@ -38,6 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import au.edu.jcu.assessment.utilityapp.ui.theme.MobileTech_UtilityAppTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 
 class MainActivity : ComponentActivity() {
@@ -150,6 +152,7 @@ fun UtilityScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -207,18 +210,41 @@ fun UtilityScreen(
         // Display first 5 API results
 
         uiState.searchResults
-            .take(5)
+            .take(3)
             .forEach { food ->
 
-                Button(
+                val energy = food.foodNutrients.firstOrNull { nutrient ->
+                    nutrient.nutrientName?.contains(
+                        "Energy",
+                        ignoreCase = true
+                    ) == true &&
+                            nutrient.unitName?.equals(
+                                "KCAL",
+                                ignoreCase = true
+                            ) == true
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         calorieViewModel.selectFood(food)
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 ) {
-                    Text(
-                        text = food.description
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = food.description,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        Text(
+                            text = energy?.value?.let {
+                                "%.0f kcal per 100g".format(it)
+                            } ?: "Calorie data unavailable",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
 
