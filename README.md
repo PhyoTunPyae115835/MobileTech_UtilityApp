@@ -40,7 +40,7 @@ The calorie calculation uses the food's calorie value per 100 grams.
 
 Formula:
 
-  Estimated Calories = Calories per 100g × Food Weight / 100`
+  Estimated Calories = Calories per 100g × Food Weight / 100
 
 Example:
 
@@ -58,9 +58,9 @@ The project separates the user interface, application state, calculation logics,
 
 Contains the Jetpack Compose user interface, including:
 
-- UtilityApp()`
-- UtilityScreen()`
-- SettingsScreen()`
+- UtilityApp()
+- UtilityScreen()
+- SettingsScreen()
 - Bottom navigation
 - Food search controls
 - Search result cards
