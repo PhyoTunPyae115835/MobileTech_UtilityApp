@@ -19,7 +19,7 @@ data class CalorieUiState(
 )
 
 class CalorieViewModel(
-    private val repository: CalorieRepository = CalorieRepository()
+    private val repository: CalorieRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalorieUiState())

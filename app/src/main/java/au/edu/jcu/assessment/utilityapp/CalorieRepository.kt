@@ -1,7 +1,7 @@
 package au.edu.jcu.assessment.utilityapp
 
 class CalorieRepository(
-    private val api: FoodApiService = RetrofitClient.foodApi
+    private val api: FoodApiService
 ) {
 
     fun calculateCalories(

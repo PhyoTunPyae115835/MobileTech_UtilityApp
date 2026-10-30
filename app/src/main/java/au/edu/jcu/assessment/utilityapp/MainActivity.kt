@@ -74,7 +74,15 @@ fun UtilityApp() {
         mutableStateOf("Utility")
     }
 
-    val calorieViewModel: CalorieViewModel = viewModel()
+    val factory = remember {
+        CalorieViewModelFactory(
+            CalorieRepository(RetrofitClient.foodApi)
+        )
+    }
+
+    val calorieViewModel: CalorieViewModel = viewModel(
+        factory = factory
+    )
 
     Scaffold(
         bottomBar = {
@@ -207,7 +215,7 @@ fun UtilityScreen(
         }
 
 
-        // Display first 5 API results
+        // Display first 3 API results
 
         uiState.searchResults
             .take(3)
