@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import java.io.IOException
+import retrofit2.HttpException
+import kotlinx.coroutines.CancellationException
 
 data class CalorieUiState(
     val caloriesPer100g: String = "",
@@ -70,18 +73,22 @@ class CalorieViewModel(
         )
     }
 
+
     fun searchFoods() {
-        val query = _uiState.value.searchQuery
+        val query = _uiState.value.searchQuery.trim()
 
         if (query.isBlank()) {
+            _uiState.value = _uiState.value.copy(
+                errorMessage = "Please enter a food name"
+            )
             return
         }
 
         viewModelScope.launch {
-
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
-                errorMessage = null
+                errorMessage = null,
+                searchResults = emptyList()
             )
 
             try {
@@ -89,18 +96,48 @@ class CalorieViewModel(
 
                 _uiState.value = _uiState.value.copy(
                     searchResults = foods,
-                    isLoading = false
+                    isLoading = false,
+                    errorMessage = if (foods.isEmpty()) {
+                        "No food results found"
+                    } else {
+                        null
+                    }
                 )
 
-            } catch (exception: Exception) {
+            } catch (exception: CancellationException) {
+                throw exception
+
+            } catch (exception: HttpException) {
+                val message = when (exception.code()) {
+                    429 -> "API request limit reached. Please try again later."
+                    401, 403 -> "API access denied. Please check the API key."
+                    in 500..599 -> "USDA server error. Please try again later."
+                    else -> "Food search failed (HTTP ${exception.code()})."
+                }
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Unable to load food data"
+                    errorMessage = message,
+                    searchResults = emptyList()
+                )
+
+            } catch (exception: IOException) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Network error. Please check your connection.",
+                    searchResults = emptyList()
+                )
+
+            } catch (exception: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Unable to load food data. Please try again.",
+                    searchResults = emptyList()
                 )
             }
         }
     }
+
 
     fun selectFood(food: FoodItem) {
         val energy = food.foodNutrients.firstOrNull { nutrient ->
